@@ -80,7 +80,10 @@ ADD ./kibana.yml /opt/kibana/config/kibana.yml
 ADD ./start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 
-EXPOSE 5601
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh 
+RUN ln -s /usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
+#ENTRYPOINT ["/entrypoint.sh"]
 
-ENTRYPOINT [ 'docker-entrypoint.sh' ]
+EXPOSE 5601 
 CMD [ "/usr/local/bin/start.sh" ]
