@@ -37,12 +37,12 @@ rm -f /var/run/kibana4.pid
 ## initialise list of log files to stream in console (initially empty)
 OUTPUT_LOGFILES=""
 
-## Validate variables
-#if [ -z "$1" ]; then
-#  echo "elasticsearch.url: 'http://localhost:9200'" >> /opt/kibana/config/kibana.yml
-#else 
-#  echo "elasticsearch.url: "${ELASTICSEARCH_HOST} >> /opt/kibana/config/kibana.yml
-
+# In case that Elasticsearch be in a different URL
+if [ "$ELASTICSEARCH_URL" ]; then
+  sed -ri "s!^(\#\s*)?(elasticsearch\.url:).*!\2 '$ELASTICSEARCH_URL'!" /opt/kibana/config/kibana.yml
+else
+  echo "elasticsearch.url: 'http://elasticsearch:9200'" >> /opt/kibana/config/kibana.yml
+fi
 
 ## start services as needed
 
@@ -55,13 +55,6 @@ if [ "$KIBANA_START" -ne "1" ]; then
 else
   service kibana start
   OUTPUT_LOGFILES+="/var/log/kibana/kibana4.log "
-fi
-
-# Exit if nothing has been started
-if [ "$ELASTICSEARCH_START" -ne "1" ] && [ "$LOGSTASH_START" -ne "1" ] \
-  && [ "$KIBANA_START" -ne "1" ]; then
-  >&2 echo "No services started. Exiting."
-  exit 1
 fi
 
 tail -f $OUTPUT_LOGFILES &
